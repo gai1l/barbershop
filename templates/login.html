@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ | BarberShop</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-box">
+
+        <!-- โลโก้ -->
+        <div class="login-logo">
+            <img src="{% static 'css/images/logo.svg' %}" width="56" height="56" alt="logo">
+            <h1>BarberShop</h1>
+            <p>Management System</p>
+        </div>
+
+        <!-- แจ้งเตือน error -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+        </div>
+        {% endif %}
+
+        <!-- ฟอร์ม Login -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">ชื่อผู้ใช้</label>
+                <input type="text" name="username" class="form-control" placeholder="กรอกชื่อผู้ใช้" autofocus>
+            </div>
+            <div class="form-group">
+                <label class="form-label">รหัสผ่าน</label>
+                <input type="password" name="password" class="form-control" placeholder="กรอกรหัสผ่าน">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:0.5rem;">
+                เข้าสู่ระบบ
+            </button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}ข้อมูลบริการ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">💈 ข้อมูลบริการ</h1>
+        <p class="page-subtitle">จัดการข้อมูลบริการทั้งหมด</p>
+    </div>
+    <a href="{% url 'service_add' %}" class="btn btn-primary">+ เพิ่มบริการ</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ชื่อบริการ</th>
+                    <th>ราคา (บาท)</th>
+                    <th>ระยะเวลา (นาที)</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.price }}</td>
+                    <td>{{ service.duration }}</td>
+                    <td>
+                        {% if service.is_active %}
+                            <span class="badge badge-progress">ใช้งานอยู่</span>
+                        {% else %}
+                            <span class="badge badge-cancelled">ไม่ใช้งาน</span>
+                        {% endif %}
+                    </td>
+                    <td style="display:flex; gap:8px;">
+                        <a href="{% url 'service_edit' service.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
+                        <a href="{% url 'service_delete' service.pk %}" class="btn btn-danger btn-sm">ลบ</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ยังไม่มีข้อมูลบริการ
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

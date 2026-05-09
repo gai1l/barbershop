@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}ข้อมูลอุปกรณ์ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">🧴 ข้อมูลอุปกรณ์</h1>
+        <p class="page-subtitle">จัดการข้อมูลอุปกรณ์ทั้งหมด</p>
+    </div>
+    <a href="{% url 'equipment_add' %}" class="btn btn-primary">+ เพิ่มอุปกรณ์</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ชื่ออุปกรณ์</th>
+                    <th>หน่วย</th>
+                    <th>คงเหลือ</th>
+                    <th>สต็อกขั้นต่ำ</th>
+                    <th>สถานะสต็อก</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for equipment in equipments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ equipment.name }}</td>
+                    <td>{{ equipment.unit }}</td>
+                    <td>{{ equipment.stock }}</td>
+                    <td>{{ equipment.min_stock }}</td>
+                    <td>
+                        {% if equipment.stock <= equipment.min_stock %}
+                            <span class="badge badge-cancelled">สต็อกต่ำ</span>
+                        {% else %}
+                            <span class="badge badge-progress">ปกติ</span>
+                        {% endif %}
+                    </td>
+                    <td style="display:flex; gap:8px;">
+                        <a href="{% url 'equipment_edit' equipment.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
+                        <a href="{% url 'equipment_delete' equipment.pk %}" class="btn btn-danger btn-sm">ลบ</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ยังไม่มีข้อมูลอุปกรณ์
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

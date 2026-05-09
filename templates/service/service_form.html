@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }}บริการ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">💈 {{ action }}ข้อมูลบริการ</h1>
+    <p class="page-subtitle">กรอกข้อมูลบริการให้ครบถ้วน</p>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">ชื่อบริการ</label>
+            {{ form.name }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ราคา (บาท)</label>
+            {{ form.price }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ระยะเวลา (นาที)</label>
+            {{ form.duration }}
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+            {{ form.is_active }}
+            <label class="form-label" style="margin:0;">ใช้งานอยู่</label>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+            <a href="{% url 'service_list' %}" class="btn btn-outline">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BarberShop{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="{% url 'dashboard' %}" class="navbar-brand">
+        <img src="{% static 'css/images/logo.svg' %}" class="navbar-logo" alt="logo">
+        <div>
+            <span class="navbar-title">BarberShop</span>
+            <span class="navbar-subtitle">Management System</span>
+        </div>
+    </a>
+
+    <div class="navbar-menu">
+        {% if request.user.is_staff %}
+        <a href="{% url 'dashboard' %}" class="nav-link">หน้าหลัก</a>
+        <div class="nav-dropdown">
+            <span class="nav-link nav-dropdown-toggle">ข้อมูลพื้นฐาน ▾</span>
+            <div class="nav-dropdown-menu">
+                <a href="{% url 'barber_list' %}" class="nav-dropdown-item">ข้อมูลช่าง</a>
+                <a href="{% url 'customer_list' %}" class="nav-dropdown-item">ข้อมูลลูกค้า</a>
+                 <a href="{% url 'service_list' %}" class="nav-dropdown-item">บริการ</a>
+                <a href="{% url 'equipment_list' %}" class="nav-dropdown-item">อุปกรณ์</a>
+            </div>
+        </div>
+        {# <a href="{% url 'purchase_list' %}" class="nav-link">ซื้ออุปกรณ์</a> #}
+        {% else %}
+        <a href="{% url 'dashboard' %}" class="nav-link">หน้าหลัก</a>
+        {% endif %}
+        {# <a href="{% url 'queue_list' %}" class="nav-link">คิว</a> #}
+
+    <div class="nav-user">
+        👤 {{ request.user.username }}
+        {% if request.user.is_staff %}
+            <span class="nav-role owner">เจ้าของร้าน</span>
+        {% else %}
+            <span class="nav-role barber">ช่าง</span>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="btn btn-outline btn-sm" style="margin-left:0.5rem;">ออก</a>
+    </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="main-content" style="padding: 2rem;">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

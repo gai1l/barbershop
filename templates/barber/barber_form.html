@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }}ช่าง | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">✂️ {{ action }}ข้อมูลช่าง</h1>
+    <p class="page-subtitle">กรอกข้อมูลช่างให้ครบถ้วน</p>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">ชื่อผู้ใช้ (สำหรับ Login)</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">รหัสผ่าน</label>
+            {{ form.password }}
+            {% if action == 'แก้ไข' %}
+            <small style="color:var(--text-muted);">ถ้าไม่ต้องการเปลี่ยนรหัสผ่าน ให้เว้นว่างไว้</small>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ชื่อช่าง</label>
+            {{ form.name }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">เบอร์โทร</label>
+            {{ form.phone }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">รูปภาพ</label>
+            {{ form.photo }}
+            {% if barber.photo %}
+            <div style="margin-top:8px;">
+                <img src="{{ barber.photo.url }}" width="80" style="border-radius:4px;">
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+            {{ form.is_active }}
+            <label class="form-label" style="margin:0;">ใช้งานอยู่</label>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+            <a href="{% url 'barber_list' %}" class="btn btn-outline">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

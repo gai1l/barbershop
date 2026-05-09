@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}ข้อมูลลูกค้า | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">👥 ข้อมูลลูกค้า</h1>
+        <p class="page-subtitle">จัดการข้อมูลลูกค้าทั้งหมด</p>
+    </div>
+    <a href="{% url 'customer_add' %}" class="btn btn-primary">+ เพิ่มลูกค้า</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ชื่อลูกค้า</th>
+                    <th>เบอร์โทร</th>
+                    <th>อีเมล</th>
+                    <th>วันที่เพิ่ม</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.phone }}</td>
+                    <td>{{ customer.email|default:'-' }}</td>
+                    <td>{{ customer.created_at|date:"d/m/Y" }}</td>
+                    <td style="display:flex; gap:8px;">
+                        <a href="{% url 'customer_edit' customer.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
+                        <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-danger btn-sm">ลบ</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ยังไม่มีข้อมูลลูกค้า
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

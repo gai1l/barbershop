@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">ยินดีต้อนรับ, {{ request.user.username }}</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    {% if request.user.is_staff %}
+    <div class="stat-card">
+        <span class="stat-label">ช่างทั้งหมด</span>
+        <span class="stat-value">{{ total_barbers }}</span>
+        <span class="stat-sub">คน</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">ลูกค้าทั้งหมด</span>
+        <span class="stat-value">{{ total_customers }}</span>
+        <span class="stat-sub">คน</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">คิววันนี้</span>
+        <span class="stat-value">{{ today_queues }}</span>
+        <span class="stat-sub">คิว</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">รายได้วันนี้</span>
+        <span class="stat-value">{{ today_income }}</span>
+        <span class="stat-sub">บาท</span>
+    </div>
+    {% else %}
+    <div class="stat-card">
+        <span class="stat-label">คิวของฉันวันนี้</span>
+        <span class="stat-value">{{ today_queues }}</span>
+        <span class="stat-sub">คิว</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">งานที่เสร็จแล้ว</span>
+        <span class="stat-value">{{ done_queues }}</span>
+        <span class="stat-sub">คิว</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- คิววันนี้ -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">คิววันนี้</h2>
+        {% if request.user.is_staff %}
+       {# <a href="{% url 'queue_list' %}" class="btn btn-outline btn-sm">ดูทั้งหมด</a> #}
+        {% endif %}
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ลูกค้า</th>
+                    <th>ช่าง</th>
+                    <th>เวลา</th>
+                    <th>สถานะ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for queue in queues %}
+                <tr>
+                    <td>{{ queue.customer.name }}</td>
+                    <td>{{ queue.barber.name }}</td>
+                    <td>{{ queue.appointment_time }}</td>
+                    <td>
+                        {% if queue.status == 'waiting' %}
+                            <span class="badge badge-waiting">รอคิว</span>
+                        {% elif queue.status == 'in_progress' %}
+                            <span class="badge badge-progress">กำลังให้บริการ</span>
+                        {% elif queue.status == 'done' %}
+                            <span class="badge badge-done">เสร็จแล้ว</span>
+                        {% else %}
+                            <span class="badge badge-cancelled">ยกเลิก</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center; color:var(--text-muted); padding: 2rem;">
+                        ไม่มีคิววันนี้
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

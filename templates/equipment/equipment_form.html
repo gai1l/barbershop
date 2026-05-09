@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action }}อุปกรณ์ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🧴 {{ action }}ข้อมูลอุปกรณ์</h1>
+    <p class="page-subtitle">กรอกข้อมูลอุปกรณ์ให้ครบถ้วน</p>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">ชื่ออุปกรณ์</label>
+            {{ form.name }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">หน่วย</label>
+            {{ form.unit }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">สต็อกขั้นต่ำ</label>
+            {{ form.min_stock }}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+            <a href="{% url 'equipment_list' %}" class="btn btn-outline">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
