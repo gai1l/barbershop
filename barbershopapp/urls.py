@@ -28,8 +28,11 @@ urlpatterns = [
     path('equipments/edit/<int:pk>/', views.equipment_edit, name='equipment_edit'),
     path('equipments/delete/<int:pk>/', views.equipment_delete, name='equipment_delete'),
 
-    # Process 3 — ซื้ออุปกรณ์ (จะเพิ่มทีหลัง)
-    # path('purchases/', views.purchase_list, name='purchase_list'),
+    # Process 3 — ซื้ออุปกรณ์
+    path('purchases/', views.purchase_list, name='purchase_list'),
+    path('purchases/add/', views.purchase_add, name='purchase_add'),
+    path('purchases/delete/<int:pk>/', views.purchase_delete, name='purchase_delete'),
+
 
     # Process 4 — คิว (เพื่อนทำต่อ)
     # path('queues/', views.queue_list, name='queue_list'),

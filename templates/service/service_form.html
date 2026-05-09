@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title">💈 {{ action }}ข้อมูลบริการ</h1>
+    <h1 class="page-title">{{ action }}ข้อมูลบริการ</h1>
     <p class="page-subtitle">กรอกข้อมูลบริการให้ครบถ้วน</p>
 </div>
 
@@ -43,7 +43,7 @@
         {% endif %}
 
         <div style="display:flex; gap:8px; margin-top:1.5rem;">
-            <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+            <button type="submit" class="btn btn-primary">บันทึก</button>
             <a href="{% url 'service_list' %}" class="btn btn-outline">ยกเลิก</a>
         </div>
     </form>

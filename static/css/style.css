@@ -187,6 +187,8 @@ body {
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .card-header {
@@ -515,4 +517,9 @@ tbody td {
 .nav-role.barber {
     background-color: rgba(136,136,136,0.15);
     color: var(--text-secondary);
+}
+/* ===== FORM CENTER ===== */
+.card[style*="max-width"] {
+    margin-left: auto;
+    margin-right: auto;
 }

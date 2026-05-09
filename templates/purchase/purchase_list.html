@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}รายการซื้ออุปกรณ์ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">รายการซื้ออุปกรณ์</h1>
+        <p class="page-subtitle">ประวัติการซื้ออุปกรณ์เข้าร้าน</p>
+    </div>
+    <a href="{% url 'purchase_add' %}" class="btn btn-primary">+ บันทึกการซื้อ</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>วันที่ซื้อ</th>
+                    <th>อุปกรณ์</th>
+                    <th>จำนวน</th>
+                    <th>ราคาต่อหน่วย</th>
+                    <th>รวม</th>
+                    <th>หมายเหตุ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for purchase in purchases %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ purchase.purchase_date|date:"d/m/Y" }}</td>
+                    <td>{{ purchase.equipment.name }}</td>
+                    <td>{{ purchase.quantity }} {{ purchase.equipment.unit }}</td>
+                    <td>{{ purchase.price_per_unit }} บาท</td>
+                    <td>{{ purchase.quantity|floatformat:0 }} x {{ purchase.price_per_unit }} = 
+                        <strong style="color:var(--accent);">
+                            {% widthratio purchase.quantity 1 purchase.price_per_unit %} บาท
+                        </strong>
+                    </td>
+                    <td>{{ purchase.note|default:'-' }}</td>
+                    <td>
+                        <a href="{% url 'purchase_delete' purchase.pk %}" class="btn btn-danger btn-sm">ลบ</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ยังไม่มีรายการซื้ออุปกรณ์
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -278,3 +278,46 @@ def equipment_delete(request, pk):
         messages.success(request, 'ลบอุปกรณ์เรียบร้อยแล้ว')
         return redirect('equipment_list')
     return render(request, 'equipment/equipment_confirm_delete.html', {'equipment': equipment})
+
+from .forms import BarberForm, CustomerForm, ServiceForm, EquipmentForm, PurchaseForm
+
+# ===== PURCHASE =====
+@login_required(login_url='/login/')
+def purchase_list(request):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    purchases = PurchaseOrder.objects.all().order_by('-purchase_date')
+    return render(request, 'purchase/purchase_list.html', {'purchases': purchases})
+
+@login_required(login_url='/login/')
+def purchase_add(request):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = PurchaseForm(request.POST)
+        if form.is_valid():
+            purchase = form.save(commit=False)
+            purchase.created_by = request.user
+            purchase.save()
+            messages.success(request, f'บันทึกการซื้อ {purchase.equipment.name} จำนวน {purchase.quantity} เรียบร้อยแล้ว')
+            return redirect('purchase_list')
+    else:
+        from django.utils import timezone
+        form = PurchaseForm(initial={'purchase_date': timezone.now().date()})
+    return render(request, 'purchase/purchase_form.html', {'form': form})
+
+@login_required(login_url='/login/')
+def purchase_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    purchase = PurchaseOrder.objects.get(pk=pk)
+    if request.method == 'POST':
+        # ลด stock กลับ
+        purchase.equipment.stock -= purchase.quantity
+        if purchase.equipment.stock < 0:
+            purchase.equipment.stock = 0
+        purchase.equipment.save()
+        purchase.delete()
+        messages.success(request, 'ลบรายการซื้อเรียบร้อยแล้ว')
+        return redirect('purchase_list')
+    return render(request, 'purchase/purchase_confirm_delete.html', {'purchase': purchase})

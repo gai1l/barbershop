@@ -85,3 +85,28 @@ class EquipmentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
+            
+from .models import Barber, Customer, Service, Equipment, PurchaseOrder
+
+# ===== PURCHASE FORM =====
+class PurchaseForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrder
+        fields = ['equipment', 'quantity', 'price_per_unit', 'purchase_date', 'note']
+        labels = {
+            'equipment': 'อุปกรณ์',
+            'quantity': 'จำนวนที่ซื้อ',
+            'price_per_unit': 'ราคาต่อหน่วย (บาท)',
+            'purchase_date': 'วันที่ซื้อ',
+            'note': 'หมายเหตุ',
+        }
+        widgets = {
+            'purchase_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'note': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name not in ['purchase_date', 'note']:
+                field.widget.attrs.update({'class': 'form-control'})

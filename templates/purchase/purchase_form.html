@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}บันทึกการซื้ออุปกรณ์ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">บันทึกการซื้ออุปกรณ์</h1>
+    <p class="page-subtitle">กรอกข้อมูลการซื้ออุปกรณ์เข้าร้าน</p>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">อุปกรณ์</label>
+            {{ form.equipment }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">จำนวนที่ซื้อ</label>
+            {{ form.quantity }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ราคาต่อหน่วย (บาท)</label>
+            {{ form.price_per_unit }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">วันที่ซื้อ</label>
+            {{ form.purchase_date }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">หมายเหตุ (ไม่บังคับ)</label>
+            {{ form.note }}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary">บันทึก</button>
+            <a href="{% url 'purchase_list' %}" class="btn btn-outline">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
