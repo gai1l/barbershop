@@ -110,3 +110,28 @@ class PurchaseForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field_name not in ['purchase_date', 'note']:
                 field.widget.attrs.update({'class': 'form-control'})
+from .models import Queue
+
+# ===== QUEUE FORM =====
+class QueueForm(forms.ModelForm):
+    class Meta:
+        model = Queue
+        fields = ['customer', 'barber', 'appointment_date', 'appointment_time', 'note']
+        labels = {
+            'customer': 'ลูกค้า',
+            'barber': 'ช่าง',
+            'appointment_date': 'วันนัด',
+            'appointment_time': 'เวลานัด',
+            'note': 'หมายเหตุ',
+        }
+        widgets = {
+            'appointment_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'appointment_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'note': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if field_name not in ['appointment_date', 'appointment_time', 'note']:
+                field.widget.attrs.update({'class': 'form-control'})

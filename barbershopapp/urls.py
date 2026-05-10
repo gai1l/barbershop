@@ -7,8 +7,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
-    # Process 2 — ข้อมูลพื้นฐาน (จะเพิ่มทีหลัง)
-     path('barbers/', views.barber_list, name='barber_list'),
+    # Process 2 — ข้อมูลพื้นฐาน
+    path('barbers/', views.barber_list, name='barber_list'),
     path('barbers/add/', views.barber_add, name='barber_add'),
     path('barbers/edit/<int:pk>/', views.barber_edit, name='barber_edit'),
     path('barbers/delete/<int:pk>/', views.barber_delete, name='barber_delete'),
@@ -33,7 +33,10 @@ urlpatterns = [
     path('purchases/add/', views.purchase_add, name='purchase_add'),
     path('purchases/delete/<int:pk>/', views.purchase_delete, name='purchase_delete'),
 
-
-    # Process 4 — คิว (เพื่อนทำต่อ)
-    # path('queues/', views.queue_list, name='queue_list'),
+    # Process 4 — คิว
+    path('queues/', views.queue_list, name='queue_list'),
+    path('queues/add/', views.queue_add, name='queue_add'),
+    path('queues/edit/<int:pk>/', views.queue_edit, name='queue_edit'),
+    path('queues/status/<int:pk>/', views.queue_update_status, name='queue_update_status'),
+    path('queues/delete/<int:pk>/', views.queue_delete, name='queue_delete'),
 ]

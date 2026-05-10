@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
 from django.utils import timezone
 from .models import Barber, Customer, Service, Equipment, Queue, PurchaseOrder
+from .forms import BarberForm, CustomerForm, ServiceForm, EquipmentForm, PurchaseForm, QueueForm
 
 # ===== LOGIN =====
 def login_view(request):
@@ -33,7 +36,6 @@ def logout_view(request):
 @login_required(login_url='/login/')
 def dashboard(request):
     today = timezone.now().date()
-
     if request.user.is_staff:
         today_queues = Queue.objects.filter(appointment_date=today).count()
         queues = Queue.objects.filter(appointment_date=today).order_by('appointment_time')
@@ -59,12 +61,7 @@ def dashboard(request):
                 'done_queues': 0,
                 'queues': [],
             }
-
     return render(request, 'dashboard.html', context)
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .forms import BarberForm, CustomerForm, ServiceForm, EquipmentForm
 
 # ===== BARBER =====
 @login_required(login_url='/login/')
@@ -279,8 +276,6 @@ def equipment_delete(request, pk):
         return redirect('equipment_list')
     return render(request, 'equipment/equipment_confirm_delete.html', {'equipment': equipment})
 
-from .forms import BarberForm, CustomerForm, ServiceForm, EquipmentForm, PurchaseForm
-
 # ===== PURCHASE =====
 @login_required(login_url='/login/')
 def purchase_list(request):
@@ -302,7 +297,6 @@ def purchase_add(request):
             messages.success(request, f'บันทึกการซื้อ {purchase.equipment.name} จำนวน {purchase.quantity} เรียบร้อยแล้ว')
             return redirect('purchase_list')
     else:
-        from django.utils import timezone
         form = PurchaseForm(initial={'purchase_date': timezone.now().date()})
     return render(request, 'purchase/purchase_form.html', {'form': form})
 
@@ -312,7 +306,6 @@ def purchase_delete(request, pk):
         return redirect('dashboard')
     purchase = PurchaseOrder.objects.get(pk=pk)
     if request.method == 'POST':
-        # ลด stock กลับ
         purchase.equipment.stock -= purchase.quantity
         if purchase.equipment.stock < 0:
             purchase.equipment.stock = 0
@@ -321,3 +314,67 @@ def purchase_delete(request, pk):
         messages.success(request, 'ลบรายการซื้อเรียบร้อยแล้ว')
         return redirect('purchase_list')
     return render(request, 'purchase/purchase_confirm_delete.html', {'purchase': purchase})
+
+# ===== QUEUE =====
+@login_required(login_url='/login/')
+def queue_list(request):
+    if request.user.is_staff:
+        queues = Queue.objects.all().order_by('-appointment_date', 'appointment_time')
+    else:
+        try:
+            barber = Barber.objects.get(user=request.user)
+            queues = Queue.objects.filter(barber=barber).order_by('-appointment_date', 'appointment_time')
+        except Barber.DoesNotExist:
+            queues = []
+    return render(request, 'queue/queue_list.html', {'queues': queues})
+
+@login_required(login_url='/login/')
+def queue_add(request):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    if request.method == 'POST':
+        form = QueueForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'เพิ่มคิวเรียบร้อยแล้ว')
+            return redirect('queue_list')
+    else:
+        form = QueueForm(initial={'appointment_date': timezone.now().date()})
+    return render(request, 'queue/queue_form.html', {'form': form, 'action': 'เพิ่ม'})
+
+@login_required(login_url='/login/')
+def queue_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    queue = Queue.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = QueueForm(request.POST, instance=queue)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'แก้ไขคิวเรียบร้อยแล้ว')
+            return redirect('queue_list')
+    else:
+        form = QueueForm(instance=queue)
+    return render(request, 'queue/queue_form.html', {'form': form, 'action': 'แก้ไข', 'queue': queue})
+
+@login_required(login_url='/login/')
+def queue_update_status(request, pk):
+    queue = Queue.objects.get(pk=pk)
+    if request.user.is_staff or (hasattr(request.user, 'barber') and queue.barber.user == request.user):
+        if request.method == 'POST':
+            status = request.POST.get('status')
+            queue.status = status
+            queue.save()
+            messages.success(request, 'อัปเดตสถานะคิวเรียบร้อยแล้ว')
+    return redirect('queue_list')
+
+@login_required(login_url='/login/')
+def queue_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    queue = Queue.objects.get(pk=pk)
+    if request.method == 'POST':
+        queue.delete()
+        messages.success(request, 'ลบคิวเรียบร้อยแล้ว')
+        return redirect('queue_list')
+    return render(request, 'queue/queue_confirm_delete.html', {'queue': queue})
