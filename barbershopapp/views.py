@@ -378,3 +378,100 @@ def queue_delete(request, pk):
         messages.success(request, 'ลบคิวเรียบร้อยแล้ว')
         return redirect('queue_list')
     return render(request, 'queue/queue_confirm_delete.html', {'queue': queue})
+from .models import Barber, Customer, Service, Equipment, Queue, PurchaseOrder, ServiceRecord, ServiceRecordItem
+from .forms import BarberForm, CustomerForm, ServiceForm, EquipmentForm, PurchaseForm, QueueForm, ServiceRecordForm
+
+# ===== SERVICE RECORD =====
+@login_required(login_url='/login/')
+def service_record_list(request):
+    if request.user.is_staff:
+        records = ServiceRecord.objects.all().order_by('-service_date')
+    else:
+        try:
+            barber = Barber.objects.get(user=request.user)
+            records = ServiceRecord.objects.filter(barber=barber).order_by('-service_date')
+        except Barber.DoesNotExist:
+            records = []
+    return render(request, 'service_record/service_record_list.html', {'records': records})
+
+@login_required(login_url='/login/')
+def service_record_add(request):
+    if request.method == 'POST':
+        form = ServiceRecordForm(request.POST)
+        if form.is_valid():
+            record = form.save(commit=False)
+            # คำนวณราคารวม
+            service_ids = request.POST.getlist('service_id')
+            quantities = request.POST.getlist('quantity')
+            total = 0
+            for sid, qty in zip(service_ids, quantities):
+                try:
+                    service = Service.objects.get(pk=sid)
+                    total += service.price * int(qty)
+                except:
+                    pass
+            record.total_price = total
+            record.save()
+            # บันทึกรายการบริการ
+            for sid, qty in zip(service_ids, quantities):
+                try:
+                    service = Service.objects.get(pk=sid)
+                    ServiceRecordItem.objects.create(
+                        record=record,
+                        service=service,
+                        quantity=int(qty),
+                        price=service.price
+                    )
+                except:
+                    pass
+            messages.success(request, 'บันทึกการใช้บริการเรียบร้อยแล้ว')
+            return redirect('service_record_list')
+    else:
+        form = ServiceRecordForm(initial={'service_date': timezone.now().date()})
+        if not request.user.is_staff:
+            try:
+                barber = Barber.objects.get(user=request.user)
+                form.fields['barber'].initial = barber
+            except:
+                pass
+    services = Service.objects.filter(is_active=True)
+    return render(request, 'service_record/service_record_form.html', {
+        'form': form,
+        'services': services
+    })
+
+@login_required(login_url='/login/')
+def service_record_detail(request, pk):
+    record = ServiceRecord.objects.get(pk=pk)
+    if not request.user.is_staff:
+        try:
+            barber = Barber.objects.get(user=request.user)
+            if record.barber != barber:
+                return redirect('service_record_list')
+        except:
+            return redirect('service_record_list')
+    items = record.items.all()
+    return render(request, 'service_record/service_record_detail.html', {
+        'record': record,
+        'items': items
+    })
+
+@login_required(login_url='/login/')
+def service_record_pay(request, pk):
+    record = ServiceRecord.objects.get(pk=pk)
+    if request.method == 'POST':
+        record.is_paid = True
+        record.save()
+        messages.success(request, 'บันทึกการชำระเงินเรียบร้อยแล้ว')
+    return redirect('service_record_list')
+
+@login_required(login_url='/login/')
+def service_record_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('dashboard')
+    record = ServiceRecord.objects.get(pk=pk)
+    if request.method == 'POST':
+        record.delete()
+        messages.success(request, 'ลบรายการเรียบร้อยแล้ว')
+        return redirect('service_record_list')
+    return render(request, 'service_record/service_record_confirm_delete.html', {'record': record})

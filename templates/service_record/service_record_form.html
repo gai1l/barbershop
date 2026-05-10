@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}บันทึกบริการ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">💇 บันทึกการใช้บริการ</h1>
+    <p class="page-subtitle">กรอกข้อมูลการใช้บริการให้ครบถ้วน</p>
+</div>
+
+<div class="card" style="max-width: 700px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">ลูกค้า</label>
+            {{ form.customer }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">ช่าง</label>
+            {{ form.barber }}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">วันที่บริการ</label>
+            {{ form.service_date }}
+        </div>
+
+        <!-- รายการบริการ -->
+        <div class="card-header" style="margin-top:1.5rem;">
+            <h3 class="card-title">รายการบริการ</h3>
+        </div>
+
+        <div id="service-items">
+            <div class="service-item" style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:8px; align-items:center;">
+                <select name="service_id" class="form-control">
+                    <option value="">-- เลือกบริการ --</option>
+                    {% for service in services %}
+                    <option value="{{ service.pk }}" data-price="{{ service.price }}">
+                        {{ service.name }} ({{ service.price }} บาท)
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="quantity" value="1" min="1" class="form-control" style="width:80px;">
+            </div>
+        </div>
+
+        <button type="button" onclick="addServiceItem()" class="btn btn-outline btn-sm" style="margin-bottom:1rem;">
+            + เพิ่มบริการ
+        </button>
+
+        <div style="background:var(--bg-secondary); padding:1rem; border-radius:6px; margin-bottom:1rem;">
+            <span style="color:var(--text-muted);">ราคารวม: </span>
+            <span id="total-price" style="color:var(--accent); font-size:1.2rem; font-weight:700;">0 บาท</span>
+        </div>
+
+        <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+            {{ form.is_paid }}
+            <label class="form-label" style="margin:0;">ชำระเงินแล้ว</label>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% for error in field.errors %}{{ error }}{% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; gap:8px; margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+            <a href="{% url 'service_record_list' %}" class="btn btn-outline">ยกเลิก</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function addServiceItem() {
+    const container = document.getElementById('service-items');
+    const div = document.createElement('div');
+    div.className = 'service-item';
+    div.style = 'display:grid; grid-template-columns: 1fr auto auto; gap:8px; margin-bottom:8px; align-items:center;';
+    div.innerHTML = `
+        <select name="service_id" class="form-control" onchange="calculateTotal()">
+            <option value="">-- เลือกบริการ --</option>
+            {% for service in services %}
+            <option value="{{ service.pk }}" data-price="{{ service.price }}">
+                {{ service.name }} ({{ service.price }} บาท)
+            </option>
+            {% endfor %}
+        </select>
+        <input type="number" name="quantity" value="1" min="1" class="form-control" style="width:80px;" onchange="calculateTotal()">
+        <button type="button" onclick="this.parentElement.remove(); calculateTotal()" class="btn btn-danger btn-sm">ลบ</button>
+    `;
+    container.appendChild(div);
+}
+
+function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('.service-item').forEach(item => {
+        const select = item.querySelector('select');
+        const qty = item.querySelector('input[name="quantity"]');
+        if (select && select.value && qty) {
+            const price = parseFloat(select.options[select.selectedIndex].dataset.price) || 0;
+            total += price * parseInt(qty.value || 1);
+        }
+    });
+    document.getElementById('total-price').textContent = total.toFixed(2) + ' บาท';
+}
+
+document.querySelectorAll('select[name="service_id"]').forEach(sel => {
+    sel.addEventListener('change', calculateTotal);
+});
+document.querySelectorAll('input[name="quantity"]').forEach(inp => {
+    inp.addEventListener('change', calculateTotal);
+});
+</script>
+{% endblock %}

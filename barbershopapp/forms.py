@@ -86,8 +86,7 @@ class EquipmentForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
             
-from .models import Barber, Customer, Service, Equipment, PurchaseOrder
-
+from .models import Barber, Customer, Service, Equipment, PurchaseOrder, Queue, ServiceRecord, ServiceRecordItem
 # ===== PURCHASE FORM =====
 class PurchaseForm(forms.ModelForm):
     class Meta:
@@ -135,3 +134,26 @@ class QueueForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field_name not in ['appointment_date', 'appointment_time', 'note']:
                 field.widget.attrs.update({'class': 'form-control'})
+                from .models import ServiceRecord, ServiceRecordItem
+
+# ===== SERVICE RECORD FORM =====
+class ServiceRecordForm(forms.ModelForm):
+    class Meta:
+        model = ServiceRecord
+        fields = ['customer', 'barber', 'service_date', 'is_paid']
+        labels = {
+            'customer': 'ลูกค้า',
+            'barber': 'ช่าง',
+            'service_date': 'วันที่บริการ',
+            'is_paid': 'ชำระเงินแล้ว',
+        }
+        widgets = {
+            'service_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                continue
+            field.widget.attrs.update({'class': 'form-control'})

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}รายละเอียดการบริการ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">💇 รายละเอียดการบริการ</h1>
+        <p class="page-subtitle">วันที่ {{ record.service_date|date:"d/m/Y" }}</p>
+    </div>
+    <a href="{% url 'service_record_list' %}" class="btn btn-outline">← กลับ</a>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+            <p class="stat-label">ลูกค้า</p>
+            <p style="color:var(--text-primary); font-weight:600;">{{ record.customer.name }}</p>
+        </div>
+        <div>
+            <p class="stat-label">ช่าง</p>
+            <p style="color:var(--text-primary); font-weight:600;">{{ record.barber.name }}</p>
+        </div>
+        <div>
+            <p class="stat-label">วันที่บริการ</p>
+            <p style="color:var(--text-primary);">{{ record.service_date|date:"d/m/Y" }}</p>
+        </div>
+        <div>
+            <p class="stat-label">สถานะชำระ</p>
+            {% if record.is_paid %}
+                <span class="badge badge-progress">ชำระแล้ว</span>
+            {% else %}
+                <span class="badge badge-waiting">ยังไม่ชำระ</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- รายการบริการ -->
+    <div class="card-header">
+        <h3 class="card-title">รายการบริการ</h3>
+    </div>
+    <div class="table-wrapper" style="margin-top:1rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>บริการ</th>
+                    <th>ราคา</th>
+                    <th>จำนวน</th>
+                    <th>รวม</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.service.name }}</td>
+                    <td>{{ item.price }} บาท</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price }} x {{ item.quantity }} = 
+                        <strong style="color:var(--accent);">
+                            {% widthratio item.quantity 1 item.price %} บาท
+                        </strong>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="text-align:right; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+        <span style="color:var(--text-muted);">ราคารวมทั้งหมด: </span>
+        <span style="color:var(--accent); font-size:1.4rem; font-weight:700;">{{ record.total_price }} บาท</span>
+    </div>
+
+    {% if not record.is_paid %}
+    <div style="margin-top:1rem;">
+        <form method="post" action="{% url 'service_record_pay' record.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">💰 บันทึกการชำระเงิน</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

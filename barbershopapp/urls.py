@@ -39,4 +39,11 @@ urlpatterns = [
     path('queues/edit/<int:pk>/', views.queue_edit, name='queue_edit'),
     path('queues/status/<int:pk>/', views.queue_update_status, name='queue_update_status'),
     path('queues/delete/<int:pk>/', views.queue_delete, name='queue_delete'),
+    
+    # Process 5 — บันทึกการใช้บริการ
+    path('records/', views.service_record_list, name='service_record_list'),
+    path('records/add/', views.service_record_add, name='service_record_add'),
+    path('records/detail/<int:pk>/', views.service_record_detail, name='service_record_detail'),
+    path('records/pay/<int:pk>/', views.service_record_pay, name='service_record_pay'),
+    path('records/delete/<int:pk>/', views.service_record_delete, name='service_record_delete'),
 ]

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}บันทึกการใช้บริการ | BarberShop{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <h1 class="page-title">💇 บันทึกการใช้บริการ</h1>
+        <p class="page-subtitle">รายการบันทึกการใช้บริการทั้งหมด</p>
+    </div>
+    <a href="{% url 'service_record_add' %}" class="btn btn-primary">+ บันทึกบริการ</a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>วันที่</th>
+                    <th>ลูกค้า</th>
+                    <th>ช่าง</th>
+                    <th>ราคารวม</th>
+                    <th>สถานะชำระ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ record.service_date|date:"d/m/Y" }}</td>
+                    <td>{{ record.customer.name }}</td>
+                    <td>{{ record.barber.name }}</td>
+                    <td>{{ record.total_price }} บาท</td>
+                    <td>
+                        {% if record.is_paid %}
+                            <span class="badge badge-progress">ชำระแล้ว</span>
+                        {% else %}
+                            <span class="badge badge-waiting">ยังไม่ชำระ</span>
+                        {% endif %}
+                    </td>
+                    <td style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <a href="{% url 'service_record_detail' record.pk %}" class="btn btn-outline btn-sm">รายละเอียด</a>
+                        {% if not record.is_paid %}
+                        <form method="post" action="{% url 'service_record_pay' record.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm">💰 ชำระเงิน</button>
+                        </form>
+                        {% endif %}
+                        {% if request.user.is_staff %}
+                        <a href="{% url 'service_record_delete' record.pk %}" class="btn btn-danger btn-sm">ลบ</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                        ยังไม่มีรายการบริการ
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
