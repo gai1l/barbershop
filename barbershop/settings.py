@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dbBarbershop',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'root1234',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }

@@ -335,9 +335,24 @@ def queue_add(request):
     if request.method == 'POST':
         form = QueueForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'เพิ่มคิวเรียบร้อยแล้ว')
-            return redirect('queue_list')
+            barber = form.cleaned_data['barber']
+            appointment_date = form.cleaned_data['appointment_date']
+            appointment_time = form.cleaned_data['appointment_time']
+
+            # เช็คว่าช่างว่างมั้ยในช่วงเวลานั้น
+            existing = Queue.objects.filter(
+                barber=barber,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time,
+                status__in=['waiting', 'in_progress']
+            ).exists()
+
+            if existing:
+                messages.error(request, f'ช่าง {barber.name} ไม่ว่างในเวลานี้ กรุณาเลือกเวลาอื่น')
+            else:
+                form.save()
+                messages.success(request, 'เพิ่มคิวเรียบร้อยแล้ว')
+                return redirect('queue_list')
     else:
         form = QueueForm(initial={'appointment_date': timezone.now().date()})
     return render(request, 'queue/queue_form.html', {'form': form, 'action': 'เพิ่ม'})
