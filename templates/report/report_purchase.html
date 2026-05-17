@@ -1,0 +1,87 @@
+{% extends 'report/report_base.html' %}
+
+{% block report_content %}
+<form method="GET" class="filter-section">
+    <div style="flex: 1; min-width: 150px;">
+        <label>เริ่มวันที่</label>
+        <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="form-control" style="width: 100%;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <label>ถึงวันที่</label>
+        <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="form-control" style="width: 100%;">
+    </div>
+    <div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: var(--gold); color: #000; border: none;">กรองข้อมูล</button>
+        <button type="button" onclick="window.print()" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: #3498db; color: #3498db;">📄 Export PDF</button>
+        <button type="submit" name="export" value="csv" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: #2ecc71; color: #2ecc71;">📥 Export CSV</button>
+        <a href="{% url 'report_purchase' %}" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: var(--border-color);">ล้าง</a>
+    </div>
+</form>
+
+<div class="grid-4">
+    <!-- Total Spent -->
+    <div class="report-card" style="border-top: 4px solid #e74c3c; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">💰</div>
+        <div class="report-card-title">ยอดใช้จ่ายรวม</div>
+        <div class="report-card-value" style="color: #e74c3c;">฿{{ total_spent|floatformat:2 }}</div>
+        <div class="report-card-sub">เงินที่ใช้ซื้ออุปกรณ์ทั้งหมด</div>
+    </div>
+    
+    <!-- Total Items -->
+    <div class="report-card" style="border-top: 4px solid #3498db; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">📦</div>
+        <div class="report-card-title">จำนวนชิ้นรวม</div>
+        <div class="report-card-value" style="color: #3498db;">{{ total_items }}</div>
+        <div class="report-card-sub">รวมสินค้าที่ซื้อเข้ามา</div>
+    </div>
+    
+    <!-- Total Transactions -->
+    <div class="report-card" style="border-top: 4px solid #f1c40f; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">🧾</div>
+        <div class="report-card-title">จำนวนครั้งที่ซื้อ</div>
+        <div class="report-card-value" style="color: #f1c40f;">{{ total_transactions }}</div>
+        <div class="report-card-sub">รายการบิลทั้งหมด</div>
+    </div>
+</div>
+
+<div class="report-card">
+    <h3 style="margin-bottom: 1rem; color: var(--gold); font-size: 1.1rem;">รายละเอียดการซื้ออุปกรณ์</h3>
+    
+    <div class="report-table-wrapper" style="overflow-x: auto;">
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>วันที่ซื้อ</th>
+                    <th>อุปกรณ์</th>
+                    <th style="text-align: center;">จำนวน</th>
+                    <th style="text-align: right;">ราคา/หน่วย</th>
+                    <th style="text-align: right;">รวม (บาท)</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for purchase in purchases %}
+                <tr>
+                    <td>{{ purchase.purchase_date|date:"d M Y" }}</td>
+                    <td style="color: #f0e6d2; font-weight: 500;">{{ purchase.equipment.name }}</td>
+                    <td style="text-align: center;">
+                        <span style="background: rgba(52, 152, 219, 0.2); color: #3498db; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">
+                            {{ purchase.quantity }} {{ purchase.equipment.unit }}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">{{ purchase.price_per_unit|floatformat:2 }}</td>
+                    <td style="text-align: right; color: #e74c3c; font-weight: 600;">
+                        {% widthratio purchase.quantity 1 purchase.price_per_unit %}
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">{{ purchase.note|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">ไม่มีข้อมูลการซื้อในช่วงเวลานี้</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -14,13 +14,22 @@
 
         <div class="form-group">
             <label class="form-label">ลูกค้า</label>
-            {{ form.customer }}
+            {{ form.customer_name }}
+            <datalist id="customer-list">
+                {% for c in customers %}
+                <option value="{{ c.name }}">
+                {% endfor %}
+            </datalist>
         </div>
 
+        {% if not form.barber.is_hidden %}
         <div class="form-group">
             <label class="form-label">ช่าง</label>
             {{ form.barber }}
         </div>
+        {% else %}
+            {{ form.barber }}
+        {% endif %}
 
         <div class="form-group">
             <label class="form-label">วันนัด</label>

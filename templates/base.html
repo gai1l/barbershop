@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BarberShop{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1">
+    
+    <!-- Flatpickr for beautiful date/time pickers -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 </head>
 <body>
 
@@ -37,6 +43,12 @@
         {% endif %}
         <a href="{% url 'queue_list' %}" class="nav-link">คิว</a>
         <a href="{% url 'service_record_list' %}" class="nav-link">บันทึกบริการ</a>
+        {% if request.user.is_staff %}
+        <a href="{% url 'report_dashboard' %}" class="nav-link">รายงาน</a>
+        {% else %}
+        <a href="{% url 'report_income' %}" class="nav-link">รายงานของฉัน</a>
+        {% endif %}
+    </div>
 
     <div class="nav-user">
         👤 {{ request.user.username }}
@@ -61,6 +73,29 @@
 
     {% block content %}{% endblock %}
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers
+        flatpickr('input[type="date"]', {
+            locale: "th",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y", // Example: 1 มกราคม 2026
+            disableMobile: "true",
+            defaultDate: "today"
+        });
+
+        // Initialize time pickers
+        flatpickr('input[type="time"]', {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            disableMobile: "true"
+        });
+    });
+</script>
 
 </body>
 </html>

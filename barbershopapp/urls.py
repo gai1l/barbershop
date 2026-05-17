@@ -31,6 +31,7 @@ urlpatterns = [
     # Process 3 — ซื้ออุปกรณ์
     path('purchases/', views.purchase_list, name='purchase_list'),
     path('purchases/add/', views.purchase_add, name='purchase_add'),
+    path('purchases/edit/<int:pk>/', views.purchase_edit, name='purchase_edit'),
     path('purchases/delete/<int:pk>/', views.purchase_delete, name='purchase_delete'),
 
     # Process 4 — คิว
@@ -43,7 +44,16 @@ urlpatterns = [
     # Process 5 — บันทึกการใช้บริการ
     path('records/', views.service_record_list, name='service_record_list'),
     path('records/add/', views.service_record_add, name='service_record_add'),
+    path('records/edit/<int:pk>/', views.service_record_edit, name='service_record_edit'),
     path('records/detail/<int:pk>/', views.service_record_detail, name='service_record_detail'),
     path('records/pay/<int:pk>/', views.service_record_pay, name='service_record_pay'),
     path('records/delete/<int:pk>/', views.service_record_delete, name='service_record_delete'),
+    
+    # Process 6 — รายงาน
+    path('reports/', views.report_dashboard, name='report_dashboard'),
+    path('reports/income/', views.report_income, name='report_income'),
+    path('reports/barber/', views.report_barber, name='report_barber'),
+    path('reports/service/', views.report_service, name='report_service'),
+    path('reports/queue/', views.report_queue, name='report_queue'),
+    path('reports/purchase/', views.report_purchase, name='report_purchase'),
 ]

@@ -3,93 +3,335 @@
 {% block title %}Dashboard | BarberShop{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="page-subtitle">ยินดีต้อนรับ, {{ request.user.username }}</p>
+<style>
+    /* Dark Luxury Dashboard Styles */
+    .dashboard-header {
+        margin-bottom: 2.5rem;
+        border-left: 4px solid var(--accent);
+        padding-left: 1rem;
+    }
+    .welcome-text {
+        color: var(--accent);
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 0.2rem;
+    }
+    .luxury-stat-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .luxury-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(200, 169, 110, 0.15);
+    }
+    .luxury-icon-bg {
+        position: absolute;
+        right: -15px;
+        top: -10px;
+        font-size: 6rem;
+        opacity: 0.04;
+        transition: opacity 0.3s;
+    }
+    .luxury-stat-card:hover .luxury-icon-bg {
+        opacity: 0.08;
+    }
+    .stat-label-lux {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        z-index: 1;
+    }
+    .stat-value-lux {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+        line-height: 1.1;
+        z-index: 1;
+    }
+    .stat-sub-lux {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        z-index: 1;
+    }
+    
+    .luxury-table-card {
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        margin-top: 1rem;
+    }
+    .luxury-table-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0,0,0,0.2);
+    }
+    .luxury-table-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div class="welcome-text">✨ ยินดีต้อนรับกลับมา, {{ request.user.username }}</div>
+    <h1 class="page-title" style="font-size: 1.8rem;">ภาพรวมระบบ (Dashboard)</h1>
 </div>
 
 <!-- Stats -->
-<div class="stats-grid">
+<div class="stats-grid" style="gap: 1.5rem; margin-bottom: 2.5rem;">
     {% if request.user.is_staff %}
-    <div class="stat-card">
-        <span class="stat-label">ช่างทั้งหมด</span>
-        <span class="stat-value">{{ total_barbers }}</span>
-        <span class="stat-sub">คน</span>
+    <!-- ช่างทั้งหมด -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #3498db;">
+        <div class="luxury-icon-bg">✂️</div>
+        <span class="stat-label-lux">ช่างทั้งหมด</span>
+        <span class="stat-value-lux" style="color: #3498db;">{{ total_barbers }}</span>
+        <span class="stat-sub-lux">ช่างในระบบ</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">ลูกค้าทั้งหมด</span>
-        <span class="stat-value">{{ total_customers }}</span>
-        <span class="stat-sub">คน</span>
+    <!-- ลูกค้าทั้งหมด -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #9b59b6;">
+        <div class="luxury-icon-bg">👥</div>
+        <span class="stat-label-lux">ลูกค้าทั้งหมด</span>
+        <span class="stat-value-lux" style="color: #9b59b6;">{{ total_customers }}</span>
+        <span class="stat-sub-lux">ฐานข้อมูลลูกค้า</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">คิววันนี้</span>
-        <span class="stat-value">{{ today_queues }}</span>
-        <span class="stat-sub">คิว</span>
+    <!-- คิววันนี้ -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #f1c40f;">
+        <div class="luxury-icon-bg">📅</div>
+        <span class="stat-label-lux">คิววันนี้</span>
+        <span class="stat-value-lux" style="color: #f1c40f;">{{ today_queues }}</span>
+        <span class="stat-sub-lux">คิวที่ต้องให้บริการวันนี้</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">รายได้วันนี้</span>
-        <span class="stat-value">{{ today_income }}</span>
-        <span class="stat-sub">บาท</span>
+    <!-- รายได้วันนี้ -->
+    <div class="luxury-stat-card" style="border-top: 4px solid var(--accent);">
+        <div class="luxury-icon-bg">💰</div>
+        <span class="stat-label-lux">รายได้วันนี้</span>
+        <span class="stat-value-lux" style="color: var(--accent);">{{ today_income|floatformat:0 }}</span>
+        <span class="stat-sub-lux">บาท</span>
     </div>
     {% else %}
-    <div class="stat-card">
-        <span class="stat-label">คิวของฉันวันนี้</span>
-        <span class="stat-value">{{ today_queues }}</span>
-        <span class="stat-sub">คิว</span>
+    <!-- คิวทั้งหมดวันนี้ -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #3498db;">
+        <div class="luxury-icon-bg">📅</div>
+        <span class="stat-label-lux">คิวทั้งหมดวันนี้</span>
+        <span class="stat-value-lux" style="color: #3498db;">{{ today_queues }}</span>
+        <span class="stat-sub-lux">รายการนัดหมายทั้งหมด</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-label">งานที่เสร็จแล้ว</span>
-        <span class="stat-value">{{ done_queues }}</span>
-        <span class="stat-sub">คิว</span>
+    <!-- รอให้บริการ -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #f1c40f;">
+        <div class="luxury-icon-bg">⏳</div>
+        <span class="stat-label-lux">รอให้บริการ</span>
+        <span class="stat-value-lux" style="color: #f1c40f;">{{ waiting_queues }}</span>
+        <span class="stat-sub-lux">คิวที่ยังไม่เสร็จสิ้น</span>
+    </div>
+    <!-- เสร็จแล้ว -->
+    <div class="luxury-stat-card" style="border-top: 4px solid #2ecc71;">
+        <div class="luxury-icon-bg">✅</div>
+        <span class="stat-label-lux">งานที่เสร็จแล้ว</span>
+        <span class="stat-value-lux" style="color: #2ecc71;">{{ done_queues }}</span>
+        <span class="stat-sub-lux">คิวที่ให้บริการเรียบร้อย</span>
+    </div>
+    <!-- รายได้ของฉัน -->
+    <div class="luxury-stat-card" style="border-top: 4px solid var(--accent);">
+        <div class="luxury-icon-bg">💰</div>
+        <span class="stat-label-lux">รายได้ของฉันวันนี้</span>
+        <span class="stat-value-lux" style="color: var(--accent);">{{ my_income|floatformat:0 }}</span>
+        <span class="stat-sub-lux">บาท</span>
     </div>
     {% endif %}
 </div>
 
-<!-- คิววันนี้ -->
-<div class="card">
-    <div class="card-header">
-        <h2 class="card-title">คิววันนี้</h2>
-        {% if request.user.is_staff %}
-       {# <a href="{% url 'queue_list' %}" class="btn btn-outline btn-sm">ดูทั้งหมด</a> #}
-        {% endif %}
+<!-- Data Tables Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+
+    <!-- คิววันนี้ -->
+    <div class="luxury-table-card" style="margin-top: 0;">
+        <div class="luxury-table-header">
+            <h2 class="luxury-table-title">📅 รายการคิววันนี้</h2>
+            {% if request.user.is_staff or request.user.barber %}
+            <a href="{% url 'queue_list' %}" class="btn btn-outline btn-sm" style="border-color: var(--accent); color: var(--accent);">จัดการคิว →</a>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ลูกค้า</th>
+                        <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ช่าง</th>
+                        <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">เวลา</th>
+                        <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: center; border-bottom: 1px solid var(--border);">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for queue in queues %}
+                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;">
+                        <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">{{ queue.customer.name }}</td>
+                        <td style="padding: 1rem; color: var(--text-secondary);">{{ queue.barber.name }}</td>
+                        <td style="padding: 1rem;">
+                            <span style="background: rgba(200, 169, 110, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;">
+                                🕒 {{ queue.appointment_time|time:"H:i" }}
+                            </span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if queue.status == 'waiting' %}
+                                <span class="badge badge-waiting" style="padding: 6px 12px; font-size: 0.8rem;">รอคิว</span>
+                            {% elif queue.status == 'in_progress' %}
+                                <span class="badge badge-progress" style="padding: 6px 12px; font-size: 0.8rem;">กำลังให้บริการ</span>
+                            {% elif queue.status == 'done' %}
+                                <span class="badge badge-done" style="padding: 6px 12px; font-size: 0.8rem;">เสร็จแล้ว</span>
+                            {% else %}
+                                <span class="badge badge-cancelled" style="padding: 6px 12px; font-size: 0.8rem;">ยกเลิก</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:var(--text-muted); padding: 3rem 1rem;">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5;">📭</div>
+                            ไม่มีคิวในวันนี้
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>ลูกค้า</th>
-                    <th>ช่าง</th>
-                    <th>เวลา</th>
-                    <th>สถานะ</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for queue in queues %}
-                <tr>
-                    <td>{{ queue.customer.name }}</td>
-                    <td>{{ queue.barber.name }}</td>
-                    <td>{{ queue.appointment_time }}</td>
-                    <td>
-                        {% if queue.status == 'waiting' %}
-                            <span class="badge badge-waiting">รอคิว</span>
-                        {% elif queue.status == 'in_progress' %}
-                            <span class="badge badge-progress">กำลังให้บริการ</span>
-                        {% elif queue.status == 'done' %}
-                            <span class="badge badge-done">เสร็จแล้ว</span>
-                        {% else %}
-                            <span class="badge badge-cancelled">ยกเลิก</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" style="text-align:center; color:var(--text-muted); padding: 2rem;">
-                        ไม่มีคิววันนี้
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    {% if request.user.is_staff %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- อุปกรณ์ใกล้หมด -->
+        <div class="luxury-table-card" style="margin-top: 0;">
+            <div class="luxury-table-header">
+                <h2 class="luxury-table-title" style="color: #e74c3c;">⚠️ อุปกรณ์ใกล้หมดสต็อก</h2>
+                <a href="{% url 'equipment_list' %}" class="btn btn-outline btn-sm" style="border-color: #e74c3c; color: #e74c3c;">เช็คสต็อก →</a>
+            </div>
+            <div class="table-wrapper">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ชื่ออุปกรณ์</th>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: center; border-bottom: 1px solid var(--border);">คงเหลือ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eq in low_stock %}
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">{{ eq.name }}</td>
+                            <td style="padding: 1rem; text-align: center;">
+                                <span style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                    {{ eq.stock }} {% if eq.unit == '2' or not eq.unit %}ชิ้น{% else %}{{ eq.unit }}{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" style="text-align:center; color:var(--text-muted); padding: 2rem 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;">✅</div>
+                                สินค้าอยู่ในสต็อกเพียงพอ
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- บริการล่าสุด -->
+        <div class="luxury-table-card" style="margin-top: 0;">
+            <div class="luxury-table-header">
+                <h2 class="luxury-table-title" style="color: #3498db;">✂️ ให้บริการล่าสุด</h2>
+                <a href="{% url 'service_record_list' %}" class="btn btn-outline btn-sm" style="border-color: #3498db; color: #3498db;">ประวัติทั้งหมด →</a>
+            </div>
+            <div class="table-wrapper">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ลูกค้า</th>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ช่าง</th>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: right; border-bottom: 1px solid var(--border);">ยอดเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in recent_records %}
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">{{ record.customer.name }}</td>
+                            <td style="padding: 1rem; color: var(--text-secondary);">{{ record.barber.name }}</td>
+                            <td style="padding: 1rem; text-align: right; color: #2ecc71; font-weight: 600;">
+                                ฿{{ record.total_price|floatformat:0 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:var(--text-muted); padding: 2rem 1rem;">
+                                ไม่มีประวัติการให้บริการ
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    {% endif %}
+    
+    {% if not request.user.is_staff %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- ประวัติการให้บริการของฉัน -->
+        <div class="luxury-table-card" style="margin-top: 0;">
+            <div class="luxury-table-header">
+                <h2 class="luxury-table-title" style="color: #3498db;">✂️ ประวัติให้บริการล่าสุด</h2>
+                <a href="{% url 'service_record_list' %}" class="btn btn-outline btn-sm" style="border-color: #3498db; color: #3498db;">ประวัติทั้งหมด →</a>
+            </div>
+            <div class="table-wrapper">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: left; border-bottom: 1px solid var(--border);">ลูกค้า</th>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: center; border-bottom: 1px solid var(--border);">เวลา</th>
+                            <th style="background: rgba(0,0,0,0.3); padding: 1rem; color: var(--text-muted); font-weight: 600; text-align: right; border-bottom: 1px solid var(--border);">ยอดเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in recent_records %}
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 1rem; color: var(--text-primary); font-weight: 500;">{{ record.customer.name }}</td>
+                            <td style="padding: 1rem; text-align: center; color: var(--text-secondary);">
+                                {{ record.service_date|date:"d/m/Y" }}
+                            </td>
+                            <td style="padding: 1rem; text-align: right; color: #2ecc71; font-weight: 600;">
+                                ฿{{ record.total_price|floatformat:0 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:var(--text-muted); padding: 2rem 1rem;">
+                                ไม่มีประวัติการให้บริการ
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

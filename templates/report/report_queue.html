@@ -1,0 +1,54 @@
+{% extends 'report/report_base.html' %}
+
+{% block report_content %}
+<div class="grid-4" style="margin-bottom: 2rem;">
+    <!-- Waiting -->
+    <div class="report-card" style="border-top: 4px solid #f1c40f; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">⏳</div>
+        <div class="report-card-title">รอคิว</div>
+        <div class="report-card-value" style="color: #f1c40f;">{{ waiting }}</div>
+        <div class="progress-wrapper" style="height: 4px; background: rgba(241, 196, 15, 0.2);">
+            <div class="progress-bar" style="background: #f1c40f; width: 100%;"></div>
+        </div>
+    </div>
+    
+    <!-- In Progress -->
+    <div class="report-card" style="border-top: 4px solid #3498db; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">✂️</div>
+        <div class="report-card-title">กำลังให้บริการ</div>
+        <div class="report-card-value" style="color: #3498db;">{{ in_progress }}</div>
+        <div class="progress-wrapper" style="height: 4px; background: rgba(52, 152, 219, 0.2);">
+            <div class="progress-bar" style="background: #3498db; width: 100%; animation: pulse 2s infinite;"></div>
+        </div>
+    </div>
+    
+    <!-- Done -->
+    <div class="report-card" style="border-top: 4px solid #2ecc71; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">✓</div>
+        <div class="report-card-title">เสร็จสิ้น</div>
+        <div class="report-card-value" style="color: #2ecc71;">{{ done }}</div>
+        <div class="progress-wrapper" style="height: 4px; background: rgba(46, 204, 113, 0.2);">
+            <div class="progress-bar" style="background: #2ecc71; width: 100%;"></div>
+        </div>
+    </div>
+    
+    <!-- Cancelled -->
+    <div class="report-card" style="border-top: 4px solid #e74c3c; position: relative; overflow: hidden;">
+        <div style="position: absolute; right: -10px; top: -10px; font-size: 5rem; opacity: 0.05;">✕</div>
+        <div class="report-card-title">ยกเลิก</div>
+        <div class="report-card-value" style="color: #e74c3c;">{{ cancelled }}</div>
+        <div class="progress-wrapper" style="height: 4px; background: rgba(231, 76, 60, 0.2);">
+            <div class="progress-bar" style="background: #e74c3c; width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+</style>
+{% endblock %}

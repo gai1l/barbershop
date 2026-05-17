@@ -1,0 +1,73 @@
+{% extends 'report/report_base.html' %}
+{% block extra_print_filter %}
+    {% if selected_barber %}
+        <strong>กรองเฉพาะช่าง:</strong> ID: {{ selected_barber }}<br>
+    {% endif %}
+{% endblock %}
+
+{% block report_content %}
+<form method="GET" class="filter-section">
+    <div style="flex: 1; min-width: 150px;">
+        <label>เริ่มวันที่</label>
+        <input type="date" name="start_date" value="{{ start_date|default:'' }}" class="form-control" style="width: 100%;">
+    </div>
+    <div style="flex: 1; min-width: 150px;">
+        <label>ถึงวันที่</label>
+        <input type="date" name="end_date" value="{{ end_date|default:'' }}" class="form-control" style="width: 100%;">
+    </div>
+    {% if request.user.is_staff %}
+    <div style="flex: 1; min-width: 200px;">
+        <label>ช่าง</label>
+        <select name="barber_id" class="form-control" style="width: 100%;">
+            <option value="" disabled selected hidden></option>
+            {% for b in barbers %}
+            <option value="{{ b.id }}" {% if selected_barber == b.id|stringformat:"i" %}selected{% endif %}>{{ b.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+    <div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: var(--gold); color: #000; border: none;">กรองข้อมูล</button>
+        <button type="button" onclick="window.print()" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: #3498db; color: #3498db;">📄 Export PDF</button>
+        <button type="submit" name="export" value="csv" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: #2ecc71; color: #2ecc71;">📥 Export CSV</button>
+        <a href="{% url 'report_income' %}" class="btn btn-outline" style="padding: 0.6rem 1rem; border-color: var(--border-color);">ล้าง</a>
+    </div>
+</form>
+
+<div class="report-table-wrapper">
+    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+        <h3 style="margin: 0; font-size: 1.2rem;">รายละเอียดรายได้</h3>
+        <div style="text-align: right;">
+            <span style="color: var(--text-muted); font-size: 0.9rem; margin-right: 0.5rem;">ยอดรวมที่กรองได้:</span>
+            <span class="text-gold" style="font-size: 1.5rem; font-weight: bold;">฿{{ total_income|floatformat:2 }}</span>
+        </div>
+    </div>
+    
+    <div style="overflow-x: auto;">
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>วันที่</th>
+                    <th>ลูกค้า</th>
+                    <th>ช่าง</th>
+                    <th style="text-align: right;">ยอดรวม (บาท)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.service_date|date:"d M Y" }}</td>
+                    <td style="font-weight: 500;">{{ record.customer.name }}</td>
+                    <td><span style="background: rgba(212, 175, 55, 0.1); color: var(--gold); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">{{ record.barber.name }}</span></td>
+                    <td style="text-align: right; color: var(--success); font-weight: bold;">{{ record.total_price }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-muted);">ไม่มีข้อมูลรายได้ในช่วงเวลานี้</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

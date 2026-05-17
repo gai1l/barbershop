@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% block title %}รายงาน | BarberShop{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <div class="header-action" style="margin-bottom: 2rem;">
+        <h2 style="color: #f0e6d2; font-weight: 600; letter-spacing: 1px;">📈 รายงานและสถิติ</h2>
+        <p style="color: #a0a0a0; font-size: 0.9rem;">ระบบแสดงผลภาพรวมและสถิติการทำงาน</p>
+    </div>
+
+    <div class="report-tabs">
+        {% if request.user.is_staff %}
+        <a href="{% url 'report_dashboard' %}" class="report-tab {% if active_tab == 'dashboard' %}active{% endif %}">แดชบอร์ดสรุป</a>
+        <a href="{% url 'report_income' %}" class="report-tab {% if active_tab == 'income' %}active{% endif %}">รายได้</a>
+        <a href="{% url 'report_barber' %}" class="report-tab {% if active_tab == 'barber' %}active{% endif %}">ผลงานช่าง</a>
+        <a href="{% url 'report_service' %}" class="report-tab {% if active_tab == 'service' %}active{% endif %}">บริการยอดฮิต</a>
+        <a href="{% url 'report_queue' %}" class="report-tab {% if active_tab == 'queue' %}active{% endif %}">สรุปคิว</a>
+        <a href="{% url 'report_purchase' %}" class="report-tab {% if active_tab == 'purchase' %}active{% endif %}">ซื้ออุปกรณ์</a>
+        {% else %}
+        <a href="{% url 'report_income' %}" class="report-tab {% if active_tab == 'income' %}active{% endif %}">สรุปรายได้ของฉัน</a>
+        <a href="{% url 'report_queue' %}" class="report-tab {% if active_tab == 'queue' %}active{% endif %}">สรุปคิวของฉัน</a>
+        {% endif %}
+    </div>
+
+    <!-- Print Header (Hidden on screen, visible on print) -->
+    <div class="print-header" style="display: none;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <h1 style="margin: 0 0 0.5rem 0; font-size: 24px; text-transform: uppercase;">Barbershop Management System</h1>
+            <h2 style="margin: 0 0 1rem 0; font-size: 18px; color: #333;">
+                {% if active_tab == 'income' %}สรุปรายงานรายได้
+                {% elif active_tab == 'purchase' %}สรุปรายงานการซื้ออุปกรณ์
+                {% elif active_tab == 'dashboard' %}สรุปภาพรวมระบบ
+                {% elif active_tab == 'queue' %}สรุปรายงานการจองคิว
+                {% elif active_tab == 'service' %}สรุปรายงานบริการยอดฮิต
+                {% elif active_tab == 'barber' %}สรุปรายงานผลงานช่าง
+                {% else %}รายงานข้อมูลระบบ
+                {% endif %}
+            </h2>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #555; text-align: left;">
+                <div>
+                    {% if start_date or end_date %}
+                        <strong>ข้อมูลช่วงวันที่:</strong> {{ start_date|default:"ไม่ระบุ" }} ถึง {{ end_date|default:"ไม่ระบุ" }}<br>
+                    {% endif %}
+                    {% block extra_print_filter %}{% endblock %}
+                </div>
+                <div style="text-align: right;">
+                    <strong>วันที่พิมพ์:</strong> <span class="print-date"></span><br>
+                    <strong>ผู้พิมพ์:</strong> {{ request.user.username }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block report_content %}{% endblock %}
+</div>
+
+<!-- Script to populate print date dynamically just before print -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dateStr = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.querySelectorAll('.print-date').forEach(el => el.textContent = dateStr);
+    });
+</script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Dark Luxury Theme for Reports */
+    :root {
+        --bg-color: #121212;
+        --card-bg: #1e1e24;
+        --border-color: #2c2c35;
+        --text-main: #f0e6d2;
+        --text-muted: #8a8a93;
+        --gold: #d4af37;
+        --gold-hover: #f1c40f;
+        --danger: #e74c3c;
+        --success: #2ecc71;
+        --info: #3498db;
+    }
+
+    .report-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        color: var(--text-main);
+    }
+
+    /* Tabs */
+    .report-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1rem;
+        overflow-x: auto;
+    }
+    .report-tab {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: transparent;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+    .report-tab:hover {
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.05);
+    }
+    .report-tab.active {
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+    }
+
+    /* Cards */
+    .report-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .report-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .report-card-title {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    .report-card-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.25rem;
+        line-height: 1.1;
+    }
+    .report-card-sub {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    /* Grids */
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .grid-auto-fill {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    /* Asymmetrical Grid for 2/3 and 1/3 layout */
+    .grid-3-1 {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) {
+        .grid-3-1 {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Chart Container */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chart-container-small {
+        position: relative;
+        height: 220px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Tables */
+    .report-table-wrapper {
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .report-table th, .report-table td {
+        padding: 1.2rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .report-table th {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: rgba(0, 0, 0, 0.2);
+    }
+    .report-table tr:hover td {
+        background-color: rgba(212, 175, 55, 0.03);
+    }
+    .report-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Filters */
+    .filter-section {
+        background: var(--card-bg);
+        padding: 1.2rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+    .filter-section .form-control {
+        background: #121212;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+    }
+    .filter-section .form-control:focus {
+        border-color: var(--gold);
+        outline: none;
+    }
+    .filter-section label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    /* Progress Bar */
+    .progress-wrapper {
+        width: 100%;
+        background-color: var(--border-color);
+        border-radius: 4px;
+        height: 8px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--gold), #ffdf00);
+    }
+
+    /* Text Colors */
+    .text-gold { color: var(--gold) !important; }
+    .text-success { color: var(--success) !important; }
+    .text-info { color: var(--info) !important; }
+    .text-danger { color: var(--danger) !important; }
+    
+    /* Print Styles for PDF Export */
+    @media print {
+        body, .report-container {
+            background: #fff !important;
+            color: #000 !important;
+        }
+        .print-header {
+            display: block !important;
+        }
+        .sidebar, .navbar, .header-action, .report-tabs, .filter-section, .btn {
+            display: none !important;
+        }
+        .report-card, .report-table-wrapper {
+            background: #fff !important;
+            border: 1px solid #ccc !important;
+            box-shadow: none !important;
+            color: #000 !important;
+            break-inside: avoid;
+        }
+        .report-card-title, .report-card-value, .report-card-sub, .report-table th, .report-table td {
+            color: #000 !important;
+        }
+        .report-table th {
+            background: #f0f0f0 !important;
+            border-bottom: 2px solid #000 !important;
+        }
+        .progress-wrapper, .luxury-icon-bg {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

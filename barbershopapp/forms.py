@@ -89,11 +89,20 @@ class EquipmentForm(forms.ModelForm):
 from .models import Barber, Customer, Service, Equipment, PurchaseOrder, Queue, ServiceRecord, ServiceRecordItem
 # ===== PURCHASE FORM =====
 class PurchaseForm(forms.ModelForm):
+    equipment_name = forms.CharField(
+        label='อุปกรณ์',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'list': 'equipment-list',
+            'class': 'form-control',
+            'autocomplete': 'off'
+        })
+    )
+
     class Meta:
         model = PurchaseOrder
-        fields = ['equipment', 'quantity', 'price_per_unit', 'purchase_date', 'note']
+        fields = ['quantity', 'price_per_unit', 'purchase_date', 'note']
         labels = {
-            'equipment': 'อุปกรณ์',
             'quantity': 'จำนวนที่ซื้อ',
             'price_per_unit': 'ราคาต่อหน่วย (บาท)',
             'purchase_date': 'วันที่ซื้อ',
@@ -113,11 +122,20 @@ from .models import Queue
 
 # ===== QUEUE FORM =====
 class QueueForm(forms.ModelForm):
+    customer_name = forms.CharField(
+        label='ลูกค้า',
+        required=True,
+        widget=forms.TextInput(attrs={
+            'list': 'customer-list',
+            'class': 'form-control',
+            'autocomplete': 'off'
+        })
+    )
+
     class Meta:
         model = Queue
-        fields = ['customer', 'barber', 'appointment_date', 'appointment_time', 'note']
+        fields = ['barber', 'appointment_date', 'appointment_time', 'note']
         labels = {
-            'customer': 'ลูกค้า',
             'barber': 'ช่าง',
             'appointment_date': 'วันนัด',
             'appointment_time': 'เวลานัด',
@@ -134,7 +152,10 @@ class QueueForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field_name not in ['appointment_date', 'appointment_time', 'note']:
                 field.widget.attrs.update({'class': 'form-control'})
-                from .models import ServiceRecord, ServiceRecordItem
+        # Ensure blank option for ModelChoiceFields
+        if 'barber' in self.fields:
+            self.fields['barber'].empty_label = ''
+            self.fields['barber'].required = False
 
 # ===== SERVICE RECORD FORM =====
 class ServiceRecordForm(forms.ModelForm):
@@ -157,3 +178,10 @@ class ServiceRecordForm(forms.ModelForm):
             if isinstance(field.widget, forms.CheckboxInput):
                 continue
             field.widget.attrs.update({'class': 'form-control'})
+        # Ensure blank option for ModelChoiceFields in ServiceRecordForm
+        if 'customer' in self.fields:
+            self.fields['customer'].empty_label = ''
+            self.fields['customer'].required = False
+        if 'barber' in self.fields:
+            self.fields['barber'].empty_label = ''
+            self.fields['barber'].required = False

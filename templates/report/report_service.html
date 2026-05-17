@@ -1,0 +1,105 @@
+{% extends 'report/report_base.html' %}
+
+{% block report_content %}
+<div class="grid-3-1">
+    <!-- Services Table -->
+    <div class="report-table-wrapper" style="align-self: start;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+            <h3 style="margin: 0; font-size: 1.1rem; color: var(--gold);">อันดับบริการยอดนิยม</h3>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>บริการ</th>
+                        <th style="text-align: center;">ใช้งาน</th>
+                        <th style="text-align: right;">รายได้รวม</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td style="color: var(--text-muted);">{{ forloop.counter }}</td>
+                        <td>
+                            <div style="font-weight: 500;">{{ service.name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                                สัดส่วน: {{ service.percentage|floatformat:1 }}%
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span style="background: rgba(52, 152, 219, 0.1); color: var(--info); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold;">
+                                {{ service.use_count|default:0 }}
+                            </span>
+                        </td>
+                        <td style="text-align: right; color: var(--success); font-weight: bold;">
+                            {{ service.total_income|default:0|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">ไม่มีข้อมูลการใช้บริการ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="report-card" style="align-self: start;">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; color: var(--gold);">สัดส่วนการใช้บริการ</h3>
+        <div class="chart-container">
+            <canvas id="serviceRatioChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.color = '#8a8a93';
+    Chart.defaults.font.family = "'Prompt', sans-serif";
+
+    const ctx = document.getElementById('serviceRatioChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ service_labels|safe }},
+            datasets: [{
+                data: {{ service_data|safe }},
+                backgroundColor: [
+                    '#d4af37', // Gold
+                    '#e6c27a', // Light gold
+                    '#3498db', // Info blue
+                    '#2ecc71', // Success green
+                    '#e74c3c', // Danger red
+                    '#9b59b6', // Purple
+                    '#8a8a93'  // Gray
+                ],
+                borderWidth: 2,
+                borderColor: '#1e1e24',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 20 } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) { label += ': '; }
+                            label += context.raw + ' ครั้ง';
+                            return label;
+                        }
+                    }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
+{% endblock %}

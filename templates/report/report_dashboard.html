@@ -1,0 +1,153 @@
+{% extends 'report/report_base.html' %}
+
+{% block report_content %}
+<!-- Summary Cards -->
+<div class="grid-4">
+    <div class="report-card">
+        <div class="report-card-title">รายได้วันนี้</div>
+        <div class="report-card-value text-gold">฿{{ today_income|floatformat:2 }}</div>
+        <div class="report-card-sub">ข้อมูลรายได้ที่รับชำระแล้ววันนี้</div>
+    </div>
+    
+    <div class="report-card">
+        <div class="report-card-title">รายได้เดือนนี้</div>
+        <div class="report-card-value text-success">฿{{ month_income|floatformat:2 }}</div>
+        <div class="report-card-sub">ยอดรวมตั้งแต่ต้นเดือน</div>
+    </div>
+    
+    <div class="report-card">
+        <div class="report-card-title">คิวงานวันนี้</div>
+        <div class="report-card-value text-info">{{ today_queues }} <span style="font-size: 1.2rem; font-weight: normal;">คิว</span></div>
+        <div class="report-card-sub">จำนวนคิวทั้งหมดที่จองไว้</div>
+    </div>
+    
+    <div class="report-card">
+        <div class="report-card-title">ลูกค้าในระบบ</div>
+        <div class="report-card-value">{{ total_customers }} <span style="font-size: 1.2rem; font-weight: normal;">คน</span></div>
+        <div class="report-card-sub">ฐานข้อมูลลูกค้าทั้งหมด</div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid-3-1">
+    <!-- Line Chart: Income -->
+    <div class="report-card">
+        <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: #d4af37;">แนวโน้มรายได้ 7 วันย้อนหลัง</h3>
+        <div class="chart-container">
+            <canvas id="incomeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Donut Chart: Top Services -->
+    <div class="report-card">
+        <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: #d4af37;">บริการยอดนิยม</h3>
+        <div class="chart-container">
+            <canvas id="serviceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid-3-1">
+    <!-- Bar Chart: Queue Status -->
+    <div class="report-card">
+        <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: #d4af37;">สถานะคิวรวม</h3>
+        <div class="chart-container-small">
+            <canvas id="queueChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Top Barber Mini Card -->
+    <div class="report-card" style="justify-content: center; align-items: center; text-align: center;">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem; color: #888;">👑 ช่างดีเด่นประจำร้าน</h3>
+        {% if top_barber %}
+            <div style="font-size: 3rem; font-weight: bold; color: #d4af37; margin: 1rem 0;">{{ top_barber.name }}</div>
+            <p style="color: #888;">ให้บริการไปแล้ว {{ top_barber.record_count }} รายการ</p>
+        {% else %}
+            <div style="font-size: 2rem; color: #555;">ยังไม่มีข้อมูล</div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.color = '#8a8a93';
+    Chart.defaults.font.family = "'Prompt', sans-serif";
+
+    // 1. Income Line Chart
+    const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+    new Chart(incomeCtx, {
+        type: 'line',
+        data: {
+            labels: {{ income_labels|safe }},
+            datasets: [{
+                label: 'รายได้ (บาท)',
+                data: {{ income_data|safe }},
+                borderColor: '#d4af37',
+                backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#121212',
+                pointBorderColor: '#d4af37'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#2c2c35' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Service Donut Chart
+    const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+    new Chart(serviceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ service_labels|safe }},
+            datasets: [{
+                data: {{ service_data|safe }},
+                backgroundColor: ['#d4af37', '#e6c27a', '#8a8a93', '#4a4a52', '#2c2c35'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // 3. Queue Bar Chart
+    const queueCtx = document.getElementById('queueChart').getContext('2d');
+    new Chart(queueCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ queue_labels|safe }},
+            datasets: [{
+                label: 'จำนวนคิว',
+                data: {{ queue_data|safe }},
+                backgroundColor: ['#f1c40f', '#3498db', '#2ecc71', '#e74c3c'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#2c2c35' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

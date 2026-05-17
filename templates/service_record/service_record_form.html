@@ -11,6 +11,9 @@
 <div class="card" style="max-width: 700px;">
     <form method="post">
         {% csrf_token %}
+        {% if queue_id %}
+        <input type="hidden" name="queue_id" value="{{ queue_id }}">
+        {% endif %}
 
         <div class="form-group">
             <label class="form-label">ลูกค้า</label>
@@ -33,17 +36,34 @@
         </div>
 
         <div id="service-items">
-            <div class="service-item" style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:8px; align-items:center;">
-                <select name="service_id" class="form-control">
-                    <option value="">-- เลือกบริการ --</option>
-                    {% for service in services %}
-                    <option value="{{ service.pk }}" data-price="{{ service.price }}">
-                        {{ service.name }} ({{ service.price }} บาท)
-                    </option>
-                    {% endfor %}
-                </select>
-                <input type="number" name="quantity" value="1" min="1" class="form-control" style="width:80px;">
-            </div>
+            {% if existing_items %}
+                {% for item in existing_items %}
+                <div class="service-item" style="display:grid; grid-template-columns: 1fr auto auto; gap:8px; margin-bottom:8px; align-items:center;">
+                    <select name="service_id" class="form-control" onchange="calculateTotal()">
+                        <option value="" disabled selected hidden></option>
+                        {% for service in services %}
+                        <option value="{{ service.pk }}" data-price="{{ service.price }}" {% if service.pk == item.service.pk %}selected{% endif %}>
+                            {{ service.name }} ({{ service.price }} บาท)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width:80px;" onchange="calculateTotal()">
+                    <button type="button" onclick="this.parentElement.remove(); calculateTotal()" class="btn btn-danger btn-sm">ลบ</button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="service-item" style="display:grid; grid-template-columns: 1fr auto; gap:8px; margin-bottom:8px; align-items:center;">
+                    <select name="service_id" class="form-control" onchange="calculateTotal()">
+                        <option value="" disabled selected hidden></option>
+                        {% for service in services %}
+                        <option value="{{ service.pk }}" data-price="{{ service.price }}">
+                            {{ service.name }} ({{ service.price }} บาท)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="quantity" value="1" min="1" class="form-control" style="width:80px;" onchange="calculateTotal()">
+                </div>
+            {% endif %}
         </div>
 
         <button type="button" onclick="addServiceItem()" class="btn btn-outline btn-sm" style="margin-bottom:1rem;">
@@ -83,7 +103,7 @@ function addServiceItem() {
     div.style = 'display:grid; grid-template-columns: 1fr auto auto; gap:8px; margin-bottom:8px; align-items:center;';
     div.innerHTML = `
         <select name="service_id" class="form-control" onchange="calculateTotal()">
-            <option value="">-- เลือกบริการ --</option>
+            <option value="" disabled selected hidden></option>
             {% for service in services %}
             <option value="{{ service.pk }}" data-price="{{ service.price }}">
                 {{ service.name }} ({{ service.price }} บาท)
@@ -114,6 +134,11 @@ document.querySelectorAll('select[name="service_id"]').forEach(sel => {
 });
 document.querySelectorAll('input[name="quantity"]').forEach(inp => {
     inp.addEventListener('change', calculateTotal);
+});
+
+// Calculate total initially when editing
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
 });
 </script>
 {% endblock %}

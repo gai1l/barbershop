@@ -49,6 +49,7 @@
                         </form>
                         {% endif %}
                         {% if request.user.is_staff %}
+                        <a href="{% url 'service_record_edit' record.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
                         <a href="{% url 'service_record_delete' record.pk %}" class="btn btn-danger btn-sm">ลบ</a>
                         {% endif %}
                     </td>

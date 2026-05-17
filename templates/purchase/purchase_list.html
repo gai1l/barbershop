@@ -34,13 +34,10 @@
                     <td>{{ purchase.equipment.name }}</td>
                     <td>{{ purchase.quantity }} {{ purchase.equipment.unit }}</td>
                     <td>{{ purchase.price_per_unit }} บาท</td>
-                    <td>{{ purchase.quantity|floatformat:0 }} x {{ purchase.price_per_unit }} = 
-                        <strong style="color:var(--accent);">
-                            {% widthratio purchase.quantity 1 purchase.price_per_unit %} บาท
-                        </strong>
-                    </td>
+                    <td><strong style="color:var(--accent);">{% widthratio purchase.quantity 1 purchase.price_per_unit %} บาท</strong></td>
                     <td>{{ purchase.note|default:'-' }}</td>
                     <td>
+                        <a href="{% url 'purchase_edit' purchase.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
                         <a href="{% url 'purchase_delete' purchase.pk %}" class="btn btn-danger btn-sm">ลบ</a>
                     </td>
                 </tr>

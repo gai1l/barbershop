@@ -8,7 +8,7 @@
         <h1 class="page-title">📋 คิวลูกค้า</h1>
         <p class="page-subtitle">จัดการคิวลูกค้าทั้งหมด</p>
     </div>
-    {% if request.user.is_staff %}
+    {% if request.user.is_staff or request.user.barber %}
     <a href="{% url 'queue_add' %}" class="btn btn-primary">+ เพิ่มคิว</a>
     {% endif %}
 </div>
@@ -36,29 +36,28 @@
                     <td>{{ queue.appointment_date|date:"d/m/Y" }}</td>
                     <td>{{ queue.appointment_time|time:"H:i" }}</td>
                     <td>
-                        {% if queue.status == 'waiting' %}
-                            <span class="badge badge-waiting">รอคิว</span>
-                        {% elif queue.status == 'in_progress' %}
-                            <span class="badge badge-progress">กำลังให้บริการ</span>
-                        {% elif queue.status == 'done' %}
-                            <span class="badge badge-done">เสร็จแล้ว</span>
+                        <!-- อัปเดตสถานะ -->
+                        {% if queue.status == 'done' %}
+                            <span class="badge badge-done" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;">เสร็จแล้ว</span>
+                        {% elif queue.status == 'cancelled' %}
+                            <span class="badge badge-cancelled" style="padding: 0.5rem 0.8rem; font-size: 0.8rem;">ยกเลิก</span>
                         {% else %}
-                            <span class="badge badge-cancelled">ยกเลิก</span>
+                            <form method="post" action="{% url 'queue_update_status' queue.pk %}">
+                                {% csrf_token %}
+                                <select name="status" class="form-control" style="padding:0.3rem; font-size:0.8rem; width:auto; display:inline-block;" onchange="this.form.submit()">
+                                    <option value="waiting" {% if queue.status == 'waiting' %}selected{% endif %}>รอคิว</option>
+                                    <option value="in_progress" {% if queue.status == 'in_progress' %}selected{% endif %}>กำลังให้บริการ</option>
+                                    <option value="done" {% if queue.status == 'done' %}selected{% endif %}>เสร็จแล้ว</option>
+                                    <option value="cancelled" {% if queue.status == 'cancelled' %}selected{% endif %}>ยกเลิก</option>
+                                </select>
+                            </form>
                         {% endif %}
                     </td>
                     <td style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <!-- อัปเดตสถานะ -->
-                        <form method="post" action="{% url 'queue_update_status' queue.pk %}">
-                            {% csrf_token %}
-                            <select name="status" class="form-control" style="padding:0.3rem; font-size:0.8rem; width:auto;" onchange="this.form.submit()">
-                                <option value="waiting" {% if queue.status == 'waiting' %}selected{% endif %}>รอคิว</option>
-                                <option value="in_progress" {% if queue.status == 'in_progress' %}selected{% endif %}>กำลังให้บริการ</option>
-                                <option value="done" {% if queue.status == 'done' %}selected{% endif %}>เสร็จแล้ว</option>
-                                <option value="cancelled" {% if queue.status == 'cancelled' %}selected{% endif %}>ยกเลิก</option>
-                            </select>
-                        </form>
-                        {% if request.user.is_staff %}
+                        {% if request.user.is_staff or queue.barber.user == request.user %}
                         <a href="{% url 'queue_edit' queue.pk %}" class="btn btn-outline btn-sm">แก้ไข</a>
+                        {% endif %}
+                        {% if request.user.is_staff %}
                         <a href="{% url 'queue_delete' queue.pk %}" class="btn btn-danger btn-sm">ลบ</a>
                         {% endif %}
                     </td>
